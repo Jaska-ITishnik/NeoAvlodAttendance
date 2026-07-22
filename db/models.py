@@ -36,79 +36,6 @@ class TimestampMixin:
     )
 
 
-# class LearningCenter(TimestampMixin, Model):
-#     """A NeoAvlod branch where an administrator may take attendance."""
-#
-#     __tablename__ = "learning_centers"
-#
-#     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-#     name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-#     address: Mapped[str] = mapped_column(String(255), nullable=False)
-#     latitude: Mapped[float] = mapped_column(Float, nullable=False)
-#     longitude: Mapped[float] = mapped_column(Float, nullable=False)
-#     allowed_radius_meters: Mapped[int] = mapped_column(
-#         Integer,
-#         default=100,
-#         nullable=False,
-#     )
-#     timezone: Mapped[str] = mapped_column(
-#         String(50),
-#         default="Asia/Tashkent",
-#         nullable=False,
-#     )
-#     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-#
-#     groups: Mapped[list["CourseGroup"]] = relationship(
-#         back_populates="learning_center",
-#     )
-#
-#     __table_args__ = (
-#         CheckConstraint(
-#             "latitude BETWEEN -90 AND 90",
-#             name="learning_centers_latitude_check",
-#         ),
-#         CheckConstraint(
-#             "longitude BETWEEN -180 AND 180",
-#             name="learning_centers_longitude_check",
-#         ),
-#         CheckConstraint(
-#             "allowed_radius_meters > 0",
-#             name="learning_centers_radius_positive_check",
-#         ),
-#     )
-
-
-# class Admin(TimestampMixin, Model):
-#     """A Telegram user allowed to mark attendance."""
-#
-#     __tablename__ = "admins"
-#
-#     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-#     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
-#     full_name: Mapped[str] = mapped_column(String(150), nullable=False)
-#     phone: Mapped[str | None] = mapped_column(String(30), unique=True)
-#     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-#
-#     attendance_records: Mapped[list["Attendance"]] = relationship(
-#         back_populates="marked_by",
-#     )
-
-
-# class Parent(TimestampMixin, Model):
-#     """A pupil's parent who receives Telegram attendance notifications."""
-#
-#     __tablename__ = "parents"
-#
-#     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-#     telegram_id: Mapped[int | None] = mapped_column(BigInteger, unique=True)
-#     full_name: Mapped[str] = mapped_column(String(150), nullable=False)
-#     phone: Mapped[str | None] = mapped_column(String(30), unique=True)
-#     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-#
-#     students: Mapped[list["Student"]] = relationship(back_populates="parent")
-#
-#
-
 class Student(TimestampMixin, Model):
     __tablename__ = "students"
 
@@ -132,8 +59,6 @@ class Student(TimestampMixin, Model):
 
 
 class CourseGroup(TimestampMixin, Model):
-    """A group of students studying one course at one NeoAvlod branch."""
-
     __tablename__ = "course_groups"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
