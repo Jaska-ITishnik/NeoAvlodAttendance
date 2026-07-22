@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block header %}
+<div class="neo-page-heading">
+    <div>
+        <span class="neo-eyebrow">NEO AVLOD ATTENDANCE</span>
+        <h1>Xayrli kun, Administrator</h1>
+        <p>{{ now.strftime('%d.%m.%Y') }} · Bugungi ta’lim jarayoni bir nigohda</p>
+    </div>
+    <div class="neo-live-pill"><span></span> Tizim faol</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <div class="neo-metrics-grid">
+        <a class="neo-metric neo-metric-indigo" href="{{ url_for(__name__ ~ ':list', identity='groups') }}">
+            <div class="neo-metric-icon"><i class="fa-solid fa-people-group"></i></div>
+            <div><span>Faol guruhlar</span><strong>{{ active_groups }}</strong><small>Guruhlarni boshqarish</small></div>
+        </a>
+        <a class="neo-metric neo-metric-cyan" href="{{ url_for(__name__ ~ ':list', identity='students') }}">
+            <div class="neo-metric-icon"><i class="fa-solid fa-user-graduate"></i></div>
+            <div><span>Faol o‘quvchilar</span><strong>{{ active_students }}</strong><small>O‘quvchilar bazasi</small></div>
+        </a>
+        <a class="neo-metric neo-metric-amber" href="{{ url_for(__name__ ~ ':list', identity='schedules') }}">
+            <div class="neo-metric-icon"><i class="fa-solid fa-calendar-day"></i></div>
+            <div><span>Bugungi darslar</span><strong>{{ today_lessons }}</strong><small>Jadval bo‘yicha</small></div>
+        </a>
+        <a class="neo-metric neo-metric-green" href="{{ url_for(__name__ ~ ':list', identity='attendance') }}">
+            <div class="neo-metric-icon"><i class="fa-solid fa-chart-simple"></i></div>
+            <div><span>Bugungi qatnashuv</span><strong>{{ '%.1f'|format(today_percent) }}%</strong><small>{{ today_present }} bor · {{ today_absent }} yo‘q</small></div>
+        </a>
+    </div>
+</div>
+
+<div class="col-xl-8 col-lg-7">
+    <section class="neo-panel h-100">
+        <div class="neo-panel-header">
+            <div><span class="neo-eyebrow">SO‘NGGI 30 KUN</span><h2>Guruhlar qatnashuvi</h2></div>
+            <a href="{{ url_for(__name__ ~ ':list', identity='attendance') }}">Barcha yozuvlar <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        {% if group_summaries %}
+            <div class="neo-ranking-list">
+            {% for item in group_summaries %}
+                <div class="neo-ranking-row">
+                    <div class="neo-rank-number">{{ loop.index }}</div>
+                    <div class="neo-rank-main">
+                        <div class="neo-rank-label"><strong>{{ item.group_name }}</strong><span>{{ item.course_name }} · {{ item.lessons }} dars</span></div>
+                        <div class="neo-progress"><span style="width: {{ item.percent }}%"></span></div>
+                    </div>
+                    <div class="neo-rank-value">{{ '%.1f'|format(item.percent) }}%</div>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div class="neo-empty">
+                <div><i class="fa-regular fa-clipboard"></i></div>
+                <h3>Statistika hali shakllanmagan</h3>
+                <p>Bot orqali birinchi davomat saqlangach natijalar shu yerda chiqadi.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+
+<div class="col-xl-4 col-lg-5">
+    <section class="neo-panel neo-quick-panel h-100">
+        <div class="neo-panel-header"><div><span class="neo-eyebrow">TEZKOR AMALLAR</span><h2>Ma’lumot qo‘shish</h2></div></div>
+        <div class="neo-quick-list">
+            <a href="{{ url_for(__name__ ~ ':create', identity='students') }}"><span class="neo-quick-icon blue"><i class="fa-solid fa-user-plus"></i></span><span><strong>Yangi o‘quvchi</strong><small>O‘quvchilar bazasiga qo‘shish</small></span><i class="fa-solid fa-chevron-right"></i></a>
+            <a href="{{ url_for(__name__ ~ ':create', identity='groups') }}"><span class="neo-quick-icon purple"><i class="fa-solid fa-people-roof"></i></span><span><strong>Yangi guruh</strong><small>Kurs guruhini yaratish</small></span><i class="fa-solid fa-chevron-right"></i></a>
+            <a href="{{ url_for(__name__ ~ ':create', identity='schedules') }}"><span class="neo-quick-icon orange"><i class="fa-solid fa-clock"></i></span><span><strong>Dars jadvali</strong><small>Guruhga vaqt biriktirish</small></span><i class="fa-solid fa-chevron-right"></i></a>
+            <a href="{{ url_for(__name__ ~ ':create', identity='enrollments') }}"><span class="neo-quick-icon green"><i class="fa-solid fa-link"></i></span><span><strong>Guruhga biriktirish</strong><small>O‘quvchini guruhga qo‘shish</small></span><i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+    </section>
+</div>
+{% endblock %}

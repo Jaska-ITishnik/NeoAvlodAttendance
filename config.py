@@ -26,8 +26,10 @@ def _parse_admin_ids(value: str | None) -> tuple[int, ...]:
 
 
 class Settings:
-    USERNAME = os.getenv('USERNAME')
+    USERNAME = os.getenv('ADMIN_USERNAME')
     SECRET_KEY = os.getenv('SECRET_KEY')
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+    ADMIN_PASSWORD_HASH = os.getenv('ADMIN_PASSWORD_HASH')
 
     def __init__(self, database, user, password, host, port, admin_ids):
         self.database = database
@@ -37,6 +39,12 @@ class Settings:
         self.port = port
         self.admin_ids = _parse_admin_ids(admin_ids)
         self.public_base_url = (os.getenv("PUBLIC_BASE_URL") or os.getenv("WEB_BASE_URL") or "").rstrip("/")
+        self.session_https_only = (os.getenv("SESSION_HTTPS_ONLY") or "false").lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
 
     def postgresql_url(self) -> str:
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"

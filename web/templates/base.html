@@ -1,0 +1,12 @@
+{% extends "@starlette-admin/base.html" %}
+
+{% block head_meta %}
+    {{ super() }}
+    <meta name="theme-color" content="#111827">
+    <meta name="color-scheme" content="light">
+{% endblock %}
+
+{% block head_css %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for(__name__ ~ ':statics', path='css/admin.css').include_query_params(v=1) }}">
+{% endblock %}

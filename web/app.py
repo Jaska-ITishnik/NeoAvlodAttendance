@@ -1,96 +1,123 @@
+from pathlib import Path
+
 import uvicorn
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.staticfiles import StaticFiles
-from starlette_admin import I18nConfig
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
+from starlette.routing import Route
+from starlette_admin import I18nConfig, TimezoneConfig
 from starlette_admin.contrib.sqla import Admin
-from starlette_admin.contrib.sqla import ModelView
 
 from config import settings
-from db import User, Category, Product, Order, Payment
+from db import Attendance, CourseGroup, GroupSchedule, GroupStudent, Student
 from db.base import db
-from db.storage import MEDIA_DIR, PROJECT_ROOT, configure_file_storage
+from web.dashboard import DashboardView
 from web.provider import UsernameAndPasswordProvider
-
-configure_file_storage()
-
-middleware = [
-    Middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
-]
-
-app = Starlette(middleware=middleware)
-app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
-app.mount("/images", StaticFiles(directory=PROJECT_ROOT / "images"), name="images")
-
-i18n_config = I18nConfig(
-    default_locale="uz"
+from web.views import (
+    AttendanceView,
+    CourseGroupView,
+    GroupScheduleView,
+    GroupStudentView,
+    StudentView,
 )
-logo_url = 'https://i.ibb.co/NgjxKy0c/china-uzbek.jpg'
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+TEMPLATES_DIR = PROJECT_ROOT / "web" / "templates"
+STATICS_DIR = PROJECT_ROOT / "web" / "static"
+
+if not settings.SECRET_KEY:
+    raise RuntimeError("SECRET_KEY admin sessiyasi uchun sozlanishi shart")
+
+
+async def root_redirect(request: Request) -> RedirectResponse:
+    return RedirectResponse(request.url_for("admin:index"), status_code=302)
+
+
+app = Starlette(
+    debug=False,
+    routes=[Route("/", root_redirect, name="home")],
+    middleware=[
+        Middleware(
+            SessionMiddleware,
+            secret_key=settings.SECRET_KEY,
+            same_site="lax",
+            https_only=settings.session_https_only,
+            max_age=60 * 60 * 12,
+        )
+    ],
+)
+
 admin = Admin(
     engine=db._engine,
-    title="Online Shop",
-    templates_dir='templates/admin/index.html',
-    base_url='/',
-    logo_url=logo_url,
-    login_logo_url='https://i.ibb.co/RkbDfwS7/login-logo-2.jpg',
+    title="Neo Avlod · Davomat",
+    base_url="/admin",
+    route_name="admin",
+    templates_dir=str(TEMPLATES_DIR),
+    statics_dir=str(STATICS_DIR),
+    index_view=DashboardView(),
     auth_provider=UsernameAndPasswordProvider(),
-    i18n_config=i18n_config
+    i18n_config=I18nConfig(default_locale="uz"),
+    timezone_config=TimezoneConfig(
+        default_timezone="Asia/Samarkand",
+        database_timezone="Asia/Samarkand",
+        use_user_locale_timezone=False,
+    ),
+    logo_url="/admin/statics/images/logo.svg",
+    login_logo_url="/admin/statics/images/logo.svg",
+    favicon_url="/admin/statics/images/favicon.svg",
 )
 
-
-class UserModelView(ModelView):
-    label = "🤵 Klientlar"
-    # list_template = ''
-
-    fields_default_sort = 'last_name', 'first_name', 'phone'
-    searchable_fields = 'last_name', 'first_name', 'phone'
-    exclude_fields_from_edit = 'created_at', 'updated_at'
-
-
-class CategoryModelView(ModelView):
-    label = "🍡Kategoriyalar"
-    exclude_fields_from_create = 'created_at', 'updated_at'
-    exclude_fields_from_edit = 'created_at', 'updated_at'
-
-
-class ProductModelView(ModelView):
-    label = "🧈Maxsulotlar"
-    fields = (
-        "id",
-        "category",
-        "name",
-        "photo",
-        "description",
-        "price",
-        "stock_quantity",
-        "is_active",
+admin.add_view(
+    CourseGroupView(
+        CourseGroup,
+        icon="fa-solid fa-people-group",
+        name="Guruh",
+        label="Guruhlar",
+        identity="groups",
     )
-    exclude_fields_from_create = 'id',
-    exclude_fields_from_edit = 'id',
+)
+admin.add_view(
+    StudentView(
+        Student,
+        icon="fa-solid fa-user-graduate",
+        name="O‘quvchi",
+        label="O‘quvchilar",
+        identity="students",
+    )
+)
+admin.add_view(
+    GroupScheduleView(
+        GroupSchedule,
+        icon="fa-solid fa-calendar-days",
+        name="Dars jadvali",
+        label="Dars jadvallari",
+        identity="schedules",
+    )
+)
+admin.add_view(
+    GroupStudentView(
+        GroupStudent,
+        icon="fa-solid fa-user-plus",
+        name="Guruh a’zosi",
+        label="Guruh a’zolari",
+        identity="enrollments",
+    )
+)
+admin.add_view(
+    AttendanceView(
+        Attendance,
+        icon="fa-solid fa-clipboard-check",
+        name="Davomat",
+        label="Davomat yozuvlari",
+        identity="attendance",
+    )
+)
 
-
-class OrderModelView(ModelView):
-    label = "Buyurtmalar"
-    fields = "id", "status", "user", "total_amount"
-    exclude_fields_from_create = 'created_at',
-    exclude_fields_from_edit = 'created_at',
-
-
-class PaymentModelView(ModelView):
-    label = "💲To'lovlar"
-    exclude_fields_from_create = 'created_at', 'updated_at'
-    exclude_fields_from_edit = 'created_at', 'updated_at'
-
-
-admin.add_view(UserModelView(User))
-admin.add_view(CategoryModelView(Category))
-admin.add_view(ProductModelView(Product))
-admin.add_view(OrderModelView(Order))
-admin.add_view(PaymentModelView(Payment))
-
-# Mount admin to your app
 admin.mount_to(app)
 
-if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8088)
+
+if __name__ == "__main__":
+    uvicorn.run("web.app:app", host="0.0.0.0", port=8088, reload=False)

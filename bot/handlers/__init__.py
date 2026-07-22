@@ -1,15 +1,5 @@
-from bot.handlers import cart, catalog, contact, help, orders, profile, settings, start, subscription
+from bot.handlers.admin import router as admin_router
 
-routers = (
-    start.router,
-    help.router,
-    subscription.router,
-    catalog.router,
-    cart.router,
-    orders.router,
-    profile.router,
-    contact.router,
-    settings.router,
-)
+routers = (admin_router,)
 
-__all__ = ("routers",)
+__all__ = ["routers"]

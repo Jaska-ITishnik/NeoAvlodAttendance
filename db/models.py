@@ -57,6 +57,9 @@ class Student(TimestampMixin, Model):
     def full_name(self) -> str:
         return f"{self.first_name} {self.last_name}".strip()
 
+    def __str__(self) -> str:
+        return self.full_name
+
 
 class CourseGroup(TimestampMixin, Model):
     __tablename__ = "course_groups"
@@ -73,6 +76,9 @@ class CourseGroup(TimestampMixin, Model):
         back_populates="group",
         cascade="all, delete-orphan",
     )
+
+    def __str__(self) -> str:
+        return f"{self.name} · {self.course_name}"
 
 
 class GroupSchedule(TimestampMixin, Model):
@@ -112,6 +118,18 @@ class GroupSchedule(TimestampMixin, Model):
         ),
     )
 
+    def __str__(self) -> str:
+        weekdays = (
+            "Dushanba",
+            "Seshanba",
+            "Chorshanba",
+            "Payshanba",
+            "Juma",
+            "Shanba",
+            "Yakshanba",
+        )
+        return f"{self.group} · {weekdays[self.weekday]} {self.start_time:%H:%M}"
+
 
 class GroupStudent(TimestampMixin, Model):
     """Membership of a student in a course group."""
@@ -145,6 +163,9 @@ class GroupStudent(TimestampMixin, Model):
         ),
     )
 
+    def __str__(self) -> str:
+        return f"{self.student} → {self.group}"
+
 
 class Attendance(TimestampMixin, Model):
     """One student's attendance for one scheduled lesson on a specific date."""
@@ -173,9 +194,10 @@ class Attendance(TimestampMixin, Model):
     )
 
     # Saved as proof that the admin was inside the center's allowed radius.
-    admin_latitude: Mapped[float] = mapped_column(Float, nullable=False)
-    admin_longitude: Mapped[float] = mapped_column(Float, nullable=False)
-    distance_from_center_meters: Mapped[float] = mapped_column(Float, nullable=False)
+    admin_latitude: Mapped[float | None] = mapped_column(Float)
+    admin_longitude: Mapped[float | None] = mapped_column(Float)
+    distance_from_center_meters: Mapped[float | None] = mapped_column(Float)
+    marked_by_telegram_id: Mapped[int | None] = mapped_column(BigInteger)
 
     parent_notified_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True)
@@ -212,3 +234,6 @@ class Attendance(TimestampMixin, Model):
             name="attendance_distance_check",
         ),
     )
+
+    def __str__(self) -> str:
+        return f"{self.student} · {self.lesson_date:%d.%m.%Y} · {self.status}"
