@@ -74,14 +74,6 @@ class CourseGroup(TimestampMixin, Model):
         cascade="all, delete-orphan",
     )
 
-    __table_args__ = (
-        UniqueConstraint(
-            "learning_center_id",
-            "name",
-            name="course_groups_center_name_unique",
-        ),
-    )
-
 
 class GroupSchedule(TimestampMixin, Model):
     """A weekly lesson slot. Weekday uses Monday=0 through Sunday=6."""
