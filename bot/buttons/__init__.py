@@ -1,6 +1,37 @@
-from bot.buttons.main_menu import MainMenu, main_menu_keyboard
-
-__all__ = (
-    "MainMenu",
-    "main_menu_keyboard",
+from bot.buttons.admin import (
+    BACK_BUTTON,
+    EVEN_BUTTON,
+    GROUPS_BUTTON,
+    ODD_BUTTON,
+    STATISTICS_BUTTON,
+    AttendanceCallback,
+    GroupCallback,
+    StatisticsCallback,
+    attendance_confirmation_inline,
+    attendance_inline,
+    group_detail_inline,
+    groups_inline,
+    groups_menu,
+    main_menu,
+    statistics_group_inline,
+    statistics_inline,
 )
+
+__all__ = [
+    "BACK_BUTTON",
+    "EVEN_BUTTON",
+    "GROUPS_BUTTON",
+    "ODD_BUTTON",
+    "STATISTICS_BUTTON",
+    "AttendanceCallback",
+    "GroupCallback",
+    "StatisticsCallback",
+    "attendance_confirmation_inline",
+    "attendance_inline",
+    "group_detail_inline",
+    "groups_inline",
+    "groups_menu",
+    "main_menu",
+    "statistics_group_inline",
+    "statistics_inline",
+]
